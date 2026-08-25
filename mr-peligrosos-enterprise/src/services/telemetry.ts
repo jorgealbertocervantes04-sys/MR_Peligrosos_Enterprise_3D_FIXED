@@ -1,0 +1,4 @@
+import type {EventRecord,ModuleId} from '../types/course';
+import {useCourseStore} from '../store';
+const API=import.meta.env.VITE_TELEMETRY_URL as string|undefined;
+export const telemetry={track(type:string,moduleId:ModuleId,payload:Record<string,unknown>={}){const event:EventRecord={type,moduleId,payload,createdAt:new Date().toISOString()};useCourseStore.getState().recordEvent(event);if(API)void fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)}).catch(()=>undefined)},exportJson(){const s=useCourseStore.getState();const data={exportedAt:new Date().toISOString(),answers:s.answers,events:s.events,exam:s.exam,completedModules:s.completedModules};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`mr-peligrosos-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url)}};

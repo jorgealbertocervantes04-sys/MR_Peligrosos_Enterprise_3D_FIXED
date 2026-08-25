@@ -1,0 +1,8 @@
+import {create} from 'zustand';
+import {persist} from 'zustand/middleware';
+import type {AnswerRecord,EventRecord,ExamResult,ModuleId} from './types/course';
+import {COURSE_MODULES} from './data/course';
+
+type Store={activeModule:ModuleId;completedModules:ModuleId[];answers:AnswerRecord[];events:EventRecord[];exam:ExamResult|null;selectedRiskPanel:'health'|'fire'|'reactivity'|'special';selectedTruckZone:string|null;openAccordion:string|null;goToModule:(id:ModuleId)=>void;completeModule:(id:ModuleId)=>void;recordAnswer:(a:AnswerRecord)=>void;recordEvent:(e:EventRecord)=>void;saveExam:(e:ExamResult)=>void;setRiskPanel:(p:Store['selectedRiskPanel'])=>void;setTruckZone:(z:string|null)=>void;setAccordion:(id:string|null)=>void;resetCourse:()=>void};
+const initial={activeModule:0 as ModuleId,completedModules:[] as ModuleId[],answers:[] as AnswerRecord[],events:[] as EventRecord[],exam:null as ExamResult|null,selectedRiskPanel:'health' as const,selectedTruckZone:null as string|null,openAccordion:null as string|null};
+export const useCourseStore=create<Store>()(persist((set)=>({...initial,goToModule:(id)=>{if(COURSE_MODULES.some(m=>m.id===id))set({activeModule:id})},completeModule:(id)=>set(s=>({completedModules:s.completedModules.includes(id)?s.completedModules:[...s.completedModules,id]})),recordAnswer:(a)=>set(s=>({answers:[...s.answers.filter(x=>!(x.moduleId===a.moduleId&&x.questionId===a.questionId)),a]})),recordEvent:(e)=>set(s=>({events:[...s.events,e].slice(-300)})),saveExam:(e)=>set({exam:e}),setRiskPanel:(p)=>set({selectedRiskPanel:p}),setTruckZone:(z)=>set({selectedTruckZone:z}),setAccordion:(id)=>set({openAccordion:id}),resetCourse:()=>set({...initial,activeModule:0})}),{name:'mr-peligrosos-course-v1'}));
